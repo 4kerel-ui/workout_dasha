@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Тренировочный план</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #151d30;
+      --card-border: #232f48;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --badge-video: #ef4444;
+      --badge-circuit: #f59e0b;
+      --badge-weight: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 20px 14px 80px 14px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px; /* Идеальная мобильная ширина */
+    }
+
+    header {
+      margin-bottom: 24px;
+      padding: 0 4px;
+    }
+
+    .header-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    /* Блок сета */
+    .set-block {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .set-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+
+    .set-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .circuit-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--badge-circuit);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    /* Элемент упражнения */
+    .exercise-item {
+      padding: 12px 10px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      background: rgba(11, 15, 25, 0.6);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .exercise-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .exercise-item:active {
+      transform: scale(0.98);
+      border-color: var(--accent);
+    }
+
+    .ex-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .ex-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      line-height: 1.35;
+      color: #fff;
+    }
+
+    .video-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+      padding: 3px 6px;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .ex-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .meta-tag {
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--badge-weight);
+    }
+
+    .tag-video-req {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .ex-notes {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Модальное окно с видео */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 440px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .modal-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 4px;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%; /* 16:9 */
+      background: #000;
+    }
+
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .empty-video-msg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="header-tag">Индивидуальный план</div>
+    <h1>Тренировка дня</h1>
+    <p class="subtitle">Нажмите на упражнение, чтобы открыть технику</p>
+  </header>
+
+  <!-- Контейнер, куда скрипт отрендерит программу -->
+  <div id="workout-root"></div>
+</div>
+
+<!-- Модальное окно YouTube -->
+<div id="video-modal" class="modal-overlay" onclick="closeVideo(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Техника выполнения</span>
+      <button class="btn-close" onclick="closeVideo()">&times;</button>
+    </div>
+    <div class="video-container">
+      <div id="modal-video-placeholder"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ==============================================================
+     БЛОК ДАННЫХ ПРОГРАММЫ
+     Чтобы изменить тренировку — редактируйте только этот список ниже:
+     - videoId: 11 символов из ссылки YouTube (или оставьте пустые кавычки "")
+     - needVideo: true/false (поставит красную плашку "Снять на видео")
+  ============================================================== */
+  const workoutData = [
+    {
+      setTitle: "Разминочный сет",
+      rounds: "2 круга",
+      exercises: [
+        {
+          name: "Жим 1 рукой вверх с кругом локтя",
+          scheme: "4 кг • 10-15 раз",
+          needVideo: false,
+          notes: "",
+          videoId: "" // Например: "dQw4w9WgXcQ"
+        },
+        {
+          name: "Тяга 1 рукой в наклоне",
+          scheme: "Круг 1: 9 кг × 15 | Круг 2: 12 кг × 10",
+          needVideo: true,
+          notes: "Снять на видео второй круг тяги",
+          videoId: ""
+        }
+      ]
+    },
+    {
+      setTitle: "Второй сет",
+      rounds: "2 круга",
+      exercises: [
+        {
+          name: "Подъём ног в висе на двух руках (или с опорой локтями)",
+          scheme: "Рабочий темп",
+          needVideo: false,
+          notes: "Контроль инерции и поясницы",
+          videoId: ""
+        },
+        {
+          name: "Пуловер",
+          scheme: "9 кг • 15-20 раз",
+          needVideo: true,
+          notes: "Снять технику на видео",
+          videoId: ""
+        }
+      ]
+    },
+    {
+      setTitle: "Третий сет",
+      rounds: "2 круга",
+      exercises: [
+        {
+          name: "Зашагивание на возвышенность",
+          scheme: "Подконтрольный подъем",
+          needVideo: false,
+          notes: "Без отталкивания опорной ногой",
+          videoId: ""
+        },
+        {
+          name: "Наклоны в позиции шага на 1 ноге",
+          scheme: "Подконтрольный темп",
+          needVideo: true,
+          notes: "Снять технику на видео",
+          videoId: ""
+        }
+      ]
+    },
+    {
+      setTitle: "Четвёртый сет",
+      rounds: "2-3 круга (по самочувствию/времени)",
+      exercises: [
+        {
+          name: "Ягодичный мостик с гантелью",
+          scheme: "15 кг • 15-20 раз",
+          needVideo: false,
+          notes: "Подложить коврик на таз и гантель сверху. Темп очень медленный.",
+          videoId: ""
+        }
+      ]
+    }
+  ];
+
+  // Рендер программы на экран
+  function renderWorkout() {
+    const root = document.getElementById("workout-root");
+    root.innerHTML = "";
+
+    workoutData.forEach((block, bIdx) => {
+      const setCard = document.createElement("div");
+      setCard.className = "set-block";
+
+      let exercisesHtml = "";
+      block.exercises.forEach((ex, eIdx) => {
+        exercisesHtml += `
+          <div class="exercise-item" onclick="openVideo(${bIdx}, ${eIdx})">
+            <div class="ex-top">
+              <span class="ex-name">${ex.name}</span>
+              <span class="video-hint">▶ Видео</span>
+            </div>
+            <div class="ex-meta">
+              <span class="meta-tag">${ex.scheme}</span>
+              ${ex.needVideo ? '<span class="tag-video-req">🎥 Снять видео</span>' : ''}
+            </div>
+            ${ex.notes ? `<div class="ex-notes">${ex.notes}</div>` : ''}
+          </div>
+        `;
+      });
+
+      setCard.innerHTML = `
+        <div class="set-header">
+          <span class="set-title">${block.setTitle}</span>
+          <span class="circuit-badge">${block.rounds}</span>
+        </div>
+        ${exercisesHtml}
+      `;
+      root.appendChild(setCard);
+    });
+  }
+
+  // Управление видео-модалкой
+  function openVideo(blockIdx, exIdx) {
+    const ex = workoutData[blockIdx].exercises[exIdx];
+    const modal = document.getElementById("video-modal");
+    const title = document.getElementById("modal-title");
+    const container = document.getElementById("modal-video-placeholder");
+
+    title.textContent = ex.name;
+
+    if (ex.videoId && ex.videoId.trim() !== "") {
+      container.innerHTML = `
+        <iframe 
+          src="https://www.youtube.com/embed/${ex.videoId.trim()}?autoplay=1&rel=0" 
+          allow="autoplay; encrypted-media" 
+          allowfullscreen>
+        </iframe>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="empty-video-msg">
+          Видео для этого упражнения скоро будет загружено тренером
+        </div>
+      `;
+    }
+
+    modal.classList.add("active");
+  }
+
+  function closeVideo(event) {
+    const modal = document.getElementById("video-modal");
+    const container = document.getElementById("modal-video-placeholder");
+    container.innerHTML = ""; // Останавливает звук видео
+    modal.classList.remove("active");
+  }
+
+  // Запуск при старте
+  renderWorkout();
+</script>
+</body>
+</html>
