@@ -35,11 +35,11 @@
 
     .container {
       width: 100%;
-      max-width: 480px; /* Идеальная мобильная ширина */
+      max-width: 480px;
     }
 
     header {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       padding: 0 4px;
     }
 
@@ -64,6 +64,37 @@
       font-size: 0.85rem;
       font-weight: 400;
       margin-top: 4px;
+    }
+
+    /* Табы переключения тренировок */
+    .tabs-wrapper {
+      display: flex;
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 20px;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--card-border);
     }
 
     /* Блок сета */
@@ -243,7 +274,7 @@
       }
     }
 
-    /* Модальное окно с видео */
+    /* Модальное окно */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -298,7 +329,7 @@
     .video-container {
       position: relative;
       width: 100%;
-      padding-bottom: 56.25%; /* 16:9 */
+      padding-bottom: 56.25%;
       background: #000;
     }
 
@@ -329,11 +360,17 @@
 <div class="container">
   <header>
     <div class="header-tag">Индивидуальный план</div>
-    <h1>Тренировка дня</h1>
+    <h1 id="page-title">Тренировка 1</h1>
     <p class="subtitle">Нажмите на упражнение, чтобы открыть технику</p>
   </header>
 
-  <!-- Контейнер, куда скрипт отрендерит программу -->
+  <!-- Переключатель тренировок -->
+  <div class="tabs-wrapper">
+    <button class="tab-btn active" onclick="switchWorkout('workout1', this)">Тренировка 1</button>
+    <button class="tab-btn" onclick="switchWorkout('workout2', this)">Тренировка 2</button>
+  </div>
+
+  <!-- Контейнер для упражнений -->
   <div id="workout-root"></div>
 </div>
 
@@ -352,103 +389,181 @@
 
 <script>
   /* ==============================================================
-     БЛОК ДАННЫХ ПРОГРАММЫ
-     Чтобы изменить тренировку — редактируйте только этот список ниже:
-     - videoId: 11 символов из ссылки YouTube (или оставьте пустые кавычки "")
-     - needVideo: true/false (поставит плашку "Снять технику")
-     
-     /// ВНИМАНИЕ ДЛЯ ИИ И РЕДАКТОРА (ВАЖНОЕ ПРАВИЛО ФОРМАТА):
-     /// В поле scheme разрешено указывать ТОЛЬКО вес и количество повторений/раз!
-     /// Можно передавать строку "4 кг • 10-15 раз" или массив строк для разных кругов:
-     /// ["Круг 1: 9 кг × 15", "Круг 2: 12 кг × 10"] — каждое отобразится в отдельном окошке!
-     /// ЗАПРЕЩЕНО писать в scheme: "рабочий темп", "подконтрольный подъем", "по самочувствию" и т.п.!
-     /// Любые подсказки по технике или темпу писать ИСКЛЮЧИТЕЛЬНО в поле notes!
+     БАЗА ДАННЫХ ТРЕНИРОВОК
   ============================================================== */
-  const workoutData = [
-    {
-      setTitle: "Разминочный сет",
-      rounds: "2 круга",
-      exercises: [
+  const allWorkouts = {
+    workout1: {
+      title: "Тренировка 1",
+      data: [
         {
-          name: "Жим 1 рукой вверх с кругом локтя",
-          scheme: "4 кг • 10-15 раз",
-          needVideo: false,
-          notes: "",
-          videoId: ""
+          setTitle: "Разминочный сет",
+          rounds: "2 круга",
+          exercises: [
+            {
+              name: "Жим 1 рукой вверх с кругом локтя",
+              scheme: "4 кг • 10-15 раз",
+              needVideo: false,
+              notes: "",
+              videoId: ""
+            },
+            {
+              name: "Тяга 1 рукой в наклоне",
+              scheme: [
+                "Круг 1: 9 кг × 15",
+                "Круг 2: 12 кг × 10"
+              ],
+              needVideo: true,
+              notes: "Сначала пробуешь привычный вес, а второй круг повышаешь. Снять на видео второй круг тяги",
+              videoId: ""
+            }
+          ]
         },
         {
-          name: "Тяга 1 рукой в наклоне",
-          scheme: [
-            "Круг 1: 9 кг × 15",
-            "Круг 2: 12 кг × 10"
-          ],
-          needVideo: true,
-          notes: "Сначала пробуешь привычный вес, а второй круг повышаешь. Снять на видео второй круг тяги",
-          videoId: ""
+          setTitle: "Второй сет",
+          rounds: "2 круга",
+          exercises: [
+            {
+              name: "Подъём ног в висе на двух руках (или с опорой локтями)",
+              scheme: "10-15 раз",
+              needVideo: false,
+              notes: "",
+              videoId: ""
+            },
+            {
+              name: "Пуловер",
+              scheme: "9 кг • 15-20 раз",
+              needVideo: true,
+              notes: "Снять технику на видео",
+              videoId: ""
+            }
+          ]
+        },
+        {
+          setTitle: "Третий сет",
+          rounds: "2 круга",
+          exercises: [
+            {
+              name: "Зашагивание на возвышенность",
+              scheme: "10-12 кг • 12-15 раз",
+              needVideo: false,
+              notes: "Подконтрольный подъем без отталкивания опорной ногой",
+              videoId: ""
+            },
+            {
+              name: "Наклоны в позиции шага на 1 ноге",
+              scheme: "10 кг • 10-12 раз",
+              needVideo: true,
+              notes: "Снять технику на видео, подконтрольный темп",
+              videoId: ""
+            }
+          ]
+        },
+        {
+          setTitle: "Четвёртый сет",
+          rounds: "2-3 круга (по самочувствию/времени)",
+          exercises: [
+            {
+              name: "Ягодичный мостик с гантелью",
+              scheme: "15 кг • 15-20 раз",
+              needVideo: false,
+              notes: "Подложить коврик на таз и гантель сверху. Темп очень медленный.",
+              videoId: ""
+            }
+          ]
         }
       ]
     },
-    {
-      setTitle: "Второй сет",
-      rounds: "2 круга",
-      exercises: [
+    workout2: {
+      title: "Тренировка 2",
+      data: [
         {
-          name: "Подъём ног в висе на двух руках (или с опорой локтями)",
-          scheme: "10-15 раз",
-          needVideo: false,
-          notes: "",
-          videoId: ""
+          setTitle: "Разминочный сет",
+          rounds: "2 круга",
+          exercises: [
+            {
+              name: "Отведение бедра с опорой на локоть",
+              scheme: "5 кг • 15 раз",
+              needVideo: false,
+              notes: "",
+              videoId: ""
+            },
+            {
+              name: "Ягодичные махи в кроссовере",
+              scheme: "2.5-5 кг • 15 раз",
+              needVideo: true,
+              notes: "Движение по диагонали назад. При толчке носочек ноги вращается наружу. Снять технику на видео",
+              videoId: ""
+            }
+          ]
         },
         {
-          name: "Пуловер",
-          scheme: "9 кг • 15-20 раз",
-          needVideo: true,
-          notes: "Снять технику на видео",
-          videoId: ""
-        }
-      ]
-    },
-    {
-      setTitle: "Третий сет",
-      rounds: "2 круга",
-      exercises: [
-        {
-          name: "Зашагивание на возвышенность",
-          scheme: "10-12 кг • 12-15 раз",
-          needVideo: false,
-          notes: "Подконтрольный подъем без отталкивания опорной ногой",
-          videoId: ""
+          setTitle: "Второй блок",
+          rounds: "2 круга",
+          exercises: [
+            {
+              name: "Приседания со штангой",
+              scheme: "15 повторений",
+              needVideo: true,
+              notes: "Начать с пустого грифа, вес подобрать на 15 повторений. Снять технику на видео",
+              videoId: ""
+            }
+          ]
         },
         {
-          name: "Наклоны в позиции шага на 1 ноге",
-          scheme: "10 кг • 10-12 раз",
-          needVideo: true,
-          notes: "Снять технику на видео, подконтрольный темп",
-          videoId: ""
-        }
-      ]
-    },
-    {
-      setTitle: "Четвёртый сет",
-      rounds: "2-3 круга (по самочувствию/времени)",
-      exercises: [
+          setTitle: "Третий блок",
+          rounds: "2 круга",
+          exercises: [
+            {
+              name: "Румынская тяга со штангой",
+              scheme: "15 повторений",
+              needVideo: true,
+              notes: "Начать с пустого грифа, вес подобрать на 15 повторений. Снять технику на видео",
+              videoId: ""
+            }
+          ]
+        },
         {
-          name: "Ягодичный мостик с гантелью",
-          scheme: "15 кг • 15-20 раз",
-          needVideo: false,
-          notes: "Подложить коврик на таз и гантель сверху. Темп очень медленный.",
-          videoId: ""
+          setTitle: "Четвёртый блок",
+          rounds: "3 круга",
+          exercises: [
+            {
+              name: "Жим 1 ногой платформы",
+              scheme: "20-25 кг • 12 раз",
+              needVideo: false,
+              notes: "Необходимо занять боковое положение на спинке так, чтобы корпус был неподвижен.",
+              videoId: ""
+            }
+          ]
         }
       ]
     }
-  ];
+  };
 
-  // Рендер программы на экран
+  let currentWorkoutKey = "workout1";
+
+  // Переключение активной тренировки
+  function switchWorkout(key, btnElement) {
+    currentWorkoutKey = key;
+    
+    // Переключение стилей кнопок
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+    btnElement.classList.add("active");
+
+    // Обновление заголовка
+    document.getElementById("page-title").textContent = allWorkouts[key].title;
+
+    // Перерисовка карточек
+    renderWorkout();
+  }
+
+  // Отрисовка выбранной программы
   function renderWorkout() {
     const root = document.getElementById("workout-root");
     root.innerHTML = "";
 
-    workoutData.forEach((block, bIdx) => {
+    const activeList = allWorkouts[currentWorkoutKey].data;
+
+    activeList.forEach((block, bIdx) => {
       const setCard = document.createElement("div");
       setCard.className = "set-block";
 
@@ -496,9 +611,9 @@
     });
   }
 
-  // Управление видео-модалкой
+  // Модальное окно
   function openVideo(blockIdx, exIdx) {
-    const ex = workoutData[blockIdx].exercises[exIdx];
+    const ex = allWorkouts[currentWorkoutKey].data[blockIdx].exercises[exIdx];
     const modal = document.getElementById("video-modal");
     const title = document.getElementById("modal-title");
     const container = document.getElementById("modal-video-placeholder");
@@ -527,11 +642,11 @@
   function closeVideo(event) {
     const modal = document.getElementById("video-modal");
     const container = document.getElementById("modal-video-placeholder");
-    container.innerHTML = ""; // Останавливает звук видео
+    container.innerHTML = "";
     modal.classList.remove("active");
   }
 
-  // Запуск при старте
+  // Старт
   renderWorkout();
 </script>
 </body>
